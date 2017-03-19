@@ -1,0 +1,30 @@
+service: signtothem.com
+
+frameworkVersion: '>=1.2.0 <2.0.0'
+
+plugins:
+  - serverless-dotenv
+  - serverless-plugin-browserify
+  - serverless-offline
+
+provider:
+  name: aws
+
+functions:
+  upload-params:
+    handler: src/video/upload.getUploadParams
+    events:
+      - http:
+          path: api/video/upload-params
+          method: get
+
+resources:
+  Resources:
+    TerpInvoiceBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${env:VIDEO_UPLOAD_BUCKET_NAME}
+        AccessControl: Private
+
+package:
+  individually: true
