@@ -16,6 +16,19 @@ const getExpiry = () => {
 };
 
 const getUploadParams = (event, context, callback) => {
+	if (!event || !event.queryStringParameters || !event.queryStringParameters.filename) {
+		callback(null, createResponse(400, { error: 'filename is required' }));
+		return;
+	}
+	if (!process.env.VIDEO_UPLOAD_ACCESS_KEY_ID || !process.env.VIDEO_UPLOAD_SECRET_ACCESS_KEY) {
+		callback(null, createResponse(400, { error: 'access and secret keys are required' }));
+		return;
+	}
+	if (!process.env.VIDEO_UPLOAD_BUCKET_NAME) {
+		callback(null, createResponse(400, { error: 'bucket name is required' }));
+		return;
+	}
+
 	const timestamp = new Date().toISOString();
 	const filename = event.queryStringParameters.filename;
 	const key = `${timestamp}--${filename}`;
@@ -30,7 +43,7 @@ const getUploadParams = (event, context, callback) => {
 		acl: 'private',
 		expires: getExpiry()
 	}, (err, data) => {
-		callback(null, err ? createResponse(500, err) : createResponse(200, data));
+		callback(null, err ? createResponse(500, { error: err.message }) : createResponse(200, data));
 	});
 };
 
